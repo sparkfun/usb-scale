@@ -27,7 +27,7 @@ you should see something like `here_is_the_weight({ ounces: 0, pounds: 0})`
 
 now to serve up that value:
 
-- run a cgi-enabled web browser (i chose [mongoose](https://code.google.com/p/mongoose/))
+- run a cgi-enabled web server (i chose [mongoose](https://code.google.com/p/mongoose/))
 - browse or make an ajax call to readscale.cgi; see _example.html_
 
 ##notes

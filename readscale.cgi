@@ -1,5 +1,8 @@
 #!C:\Python33\python.exe
 
+# This program can be distributed under the terms of the GNU GPL.
+# See the file COPYING.
+
 print("Content-type: text/javascript\r\n\r\n")
 
 import usb.core
