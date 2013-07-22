@@ -1,0 +1,27 @@
+<input type=text id=pounds>
+<input type=text id=ounces>
+
+<script>
+$.ajax({
+  url: 'http://path/to/readScale.cgi',
+
+  // use jsonp unless you are serving everything from the box
+  // the scale is plugged into.
+  dataType: 'jsonp',
+
+  // this timeout is because jquery jsonp calls will not fire
+  // error or complete normally; either success or nothing.
+  timeout: 3000,
+
+  success: function (data, textStatus) {
+    if (typeof data.pounds != 'undefined' && typeof data.ounces != 'undefined') {
+      $('#pounds').val(data.pounds);
+      $('#ounces').val(data.ounces);
+    }
+  },
+  error: function (xhr, textStatus, errorThrown) {
+    alert('The scale is not responding.');
+  }
+  jsonpCallback: 'here_is_the_weight'
+});
+</script>
