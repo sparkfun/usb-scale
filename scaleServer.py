@@ -5,7 +5,7 @@
 import json
 import threading
 
-from readscale import USBScale
+from readscale import set_scale
 
 from flask import Flask
 from flask import render_template
@@ -14,42 +14,42 @@ from flask_socketio import SocketIO
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
-socketio = SocketIO(app)
+socketio = SocketIO(app, async_mode="threading")
+# socketio = SocketIO(app)
 
 clients = 0
-scale = USBScale()
+scale = set_scale()
 
 
 @app.route('/', methods=['GET'])
 def index():
-    return render_template('index.html')
+    scale.update()
+    return render_template('index.html', lbs=scale.pounds, ozs=scale.ounces)
 
 
-def send_weight(weight, reschedule=0.1):
+def send_weight(reschedule=0.2):
     """
     broadcast the weight on the scale to listeners
     :param weight: dictionary with
     :param reschedule: time delay to reschedule the function
     :return: None
     """
-    socketio.send(
-        json.dumps(weight, json=True)
-    )
-    if reschedule:
-        threading.Timer(reschedule, send_weight)
+    scale.update()
+    weight = {
+        'lbs': scale.pounds,
+        'ozs': scale.ounces
+    }
+    if clients:
+        socketio.send(weight)
+    if reschedule and clients:
+        threading.Timer(reschedule, send_weight).start()
 
 
 @socketio.on('connect')
 def serve_weight():
     global clients
-    socketio.send('Connected')
-    dummy_weight = {'lbs': 1,
-                    'oz': 15.6}
     clients += 1
-    while clients:
-        socketio.send(
-            json.dumps(dummy_weight, json=True)
-        )
+    send_weight()
 
 
 @socketio.on('disconnect')

@@ -6,9 +6,11 @@
 </head>
 <body>
 <h1>Scale Data</h1>
-Pounds:<input name="lbs"><br>
-Ounces:<input name="ozs"><br>
+Pounds:<input name="lbs" value="{{ lbs }}"><br>
+Ounces:<input name="ozs" value="{{ ozs }}"><br>
 <button name="readRecord">Read</button>
 
 </body>
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='websocket.js') }}"></script>
 </html>

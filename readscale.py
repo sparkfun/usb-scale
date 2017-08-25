@@ -3,8 +3,7 @@
 # See the file COPYING.
 
 try:
-    import usb.core
-    import usb.util
+    import usb
 except ImportError:
     pass
 try:
@@ -13,8 +12,6 @@ except ImportError:
     pass
 
 import sys
-
-system = sys.platform
 
 
 class USBScaleBase(object):
@@ -91,33 +88,12 @@ class USBScaleWin(USBScaleBase):
         empty = False
         while True:
             data = self.device.read(self.endpoint.bEndpointAddress,
-                                    self.endpoint.wMaxPacketSize)
+                                    self.endpoint.wMaxPacketSize,
+                                    timeout=100)
             if not data:
                 empty = True
             if data and empty:
                 break
-
-        # for some damn reason this thing holds onto its old
-        # value for at least 1 or 2 packets after changing
-        # so burn a few before you take one
-        preload = 3
-        while preload > 0:
-            self.device.read(self.endpoint.bEndpointAddress,
-                             self.endpoint.wMaxPacketSize)
-            preload -= 1
-
-        # read a data packet
-        attempts = 10
-        data = None
-        while data is None and attempts > 0:
-            try:
-                data = self.device.read(self.endpoint.bEndpointAddress,
-                                        self.endpoint.wMaxPacketSize)
-            except usb.core.USBError as e:
-                data = None
-                if e.args == ('Operation timed out',):
-                    attempts -= 10
-                    continue
 
         self.raw_weight = data[4] + data[5] * 256
         self.data = data
@@ -170,10 +146,14 @@ def system_type():
         raise NotImplementedError('The current system type is not supported')
 
 
+def set_scale():
+    scale = globals()['USBScale' + system_type()]()
+    return scale
+
 if __name__ == '__main__':
     print("Content-type: text/javascript\r\n\r\n")
 
-    scale = globals()['USBScale' + system_type()]()
+    scale = set_scale()
     pounds, ounces = scale.pounds, scale.ounces
 
     # in a word, jsonp
