@@ -3,14 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <title>Scale Data</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 </head>
 <body>
 <h1>Scale Data</h1>
-Pounds:<input name="lbs" value="{{ lbs }}"><br>
-Ounces:<input name="ozs" value="{{ ozs }}"><br>
-<button name="readRecord">Read</button>
+Pounds:<input name="lbs" value="Connecting..."><br>
+Ounces:<input name="ozs" value="Connecting..."><br>
+<button name="readRecord">Record</button>
 
 </body>
-<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
-<script type="text/javascript" src="{{ url_for('static', filename='websocket.js') }}"></script>
+<script type="text/javascript" >
+    console.log('hello');
+    var myWebsocket
+    $("button[name=readRecord]").on("click", connect)
+    setSockets();
+
+    function setSockets(){
+        myWebsocket = new WebSocket('ws://localhost:8000/data');
+        myWebsocket.onmessage = function(evt) {
+            var data = JSON.parse(evt.data);
+            $("input[name=lbs").val(data['lbs']);
+            $("input[name=ozs").val(data['ozs']);
+            //console.log(data);
+            };
+        }
+
+    function connect(elem){
+        var button_text = elem.target.innerText;
+        if (button_text == "Read"){
+            elem.target.innerText = "Record";
+            setSockets();
+        } else {
+            elem.target.innerText = "Read";
+            myWebsocket.close();
+        }
+    };
+
+</script>
 </html>
