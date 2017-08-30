@@ -107,8 +107,9 @@ class USBScaleMac(USBScaleBase):
         try:
             self.device.open(self.VENDOR_ID, self.PRODUCT_ID)
         except IOError:
-            print "Device appears to be busy, please check that it is not in " \
-                  "use by another process"
+            sys.stdout.write("\rDevice appears to be busy, please check that "
+                             "it is not in use by another process")
+            sys.stdout.flush()
         self.device.set_nonblocking(1)
         self.raw_weight = self.read()
 
