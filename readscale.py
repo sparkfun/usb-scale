@@ -21,7 +21,7 @@ class USBScaleBase(object):
     DATA_MODE_OUNCES = 11
 
     def __init__(self):
-        self.data = None
+        self.data = [0, 0, 0, 0, 0, 0]
         self.raw_weight = None
 
     def update(self):
@@ -68,7 +68,7 @@ class USBScaleBase(object):
 
 class USBScaleWin(USBScaleBase):
     def __init__(self):
-        super(USBScaleBase, self).__init__()
+        super(USBScaleWin, self).__init__()
         # find the USB device
         self.device = usb.core.find(idVendor=self.VENDOR_ID,
                                     idProduct=self.PRODUCT_ID)
@@ -84,25 +84,32 @@ class USBScaleWin(USBScaleBase):
         Read the scale data and return the raw, uncorrected values
         :return:
         """
-        # Empty out the buffer for accurate results
-        empty = False
+        # Empty out the buffer and take the last result for more accurate results
+        data = None
         while True:
-            data = self.device.read(self.endpoint.bEndpointAddress,
-                                    self.endpoint.wMaxPacketSize,
-                                    timeout=100)
-            if not data:
-                empty = True
-            if data and empty:
-                break
+            try:
+                data = self.device.read(self.endpoint.bEndpointAddress,
+                                        self.endpoint.wMaxPacketSize,
+                                        timeout=100)
+            except usb.core.USBError as e:
+                if 'time' in e.strerror:
+                    break
+                raise e
+        if not data:
+            return
 
         self.raw_weight = data[4] + data[5] * 256
         self.data = data
         return self.raw_weight
 
+    def __del__(self):
+        """Be sure to release the scale"""
+        usb.util.dispose_resources(self.device)
+
 
 class USBScaleMac(USBScaleBase):
     def __init__(self):
-        super(USBScaleBase, self).__init__()
+        super(USBScaleMac, self).__init__()
         self.device = hid.device()
         try:
             self.device.open(self.VENDOR_ID, self.PRODUCT_ID)

@@ -1,36 +1,63 @@
-# Reading a usb hid scale with your browser
+# Reading a Usb HID Scale with your Browser
 
-these instructions are for the **dymo m25 postal scale** on **windows 7** but with a little hacking other scales and operating systems should be usable.
+These instructions are for the **Dymo M25 postal scale** on **Windows 8**, 
+**Windows 10**, or **Mac OS X** but with a little hacking other scales and 
+operating systems should be usable.
 
-readscale.cgi is a modified version of the code found here (used with permission): http://steventsnyder.com/reading-a-dymo-usb-scale-using-python/
+readscale.cgi is a modified version of the code found here (used with 
+permission): http://steventsnyder.com/reading-a-dymo-usb-scale-using-python/
+
+The newest version serves the scale values via Websockets
 
 ## How To
 
-vendor and products ids for the m25 should be 0922 and 8004 respectively. if your scale is different, update readscale.cgi with its values. you'll also need to know them for the install procedure below.
+Vendor and products ids for the m25 should be 0922 and 8004 respectively. If 
+your scale is different, update readscale.py with its values. you'll also need 
+to know them for the install procedure below.
 
-on the computer that needs to read from the scale:
+### Installation
+On the computer that needs to read from the scale:
 
-- install [python](http://www.python.org/getit/)
-- install [pyusb](https://github.com/walac/pyusb) (python.exe setup.py install)
-- install [libusb-win32](http://sourceforge.net/apps/trac/libusb-win32/wiki)
+- Install [python](http://www.python.org/getit/)
+- Install gevent and gevent-websocket ```pip install gevent gevent-websocket```
 
-now we roll up a driver that python can read:
+For Windows installations:
+- Install pyusb ```pip install pyusb```
+- Install the proper driver so that Python can talk to the scale on 
+Windows.  There are many ways to do this, but the recommeded method is with 
+[**Zadig**](http://zadig.akeo.ie/)
+  - Plug in the scale and turn it on
+  - Open **Zadig**
+  - Click ```Options > List All Devices```
+  - Select ```M25 25 lb Digital Postal Scale```
+  - Click ```Install Driver```
 
-- plug the scale in and turn it on
-- run LIBUSBDIR/bin/ARCH/install-filter-win.exe (choose your scale device)
-- run LIBUSBDIR/bin/inf-wizard.exe (choose your scale device and "install now" at the end)
-- restart the scale
+For Mac OSX installations:
+- Install hidapi ```pip install hidapi```
 
-run `python.exe readscale.cgi`
+### Creating Certificates and Keys
+If you need to serve the scale values over **HTTPS** (which you probably 
+should).  You will need a certificate and private key. 
 
-you should see something like `here_is_the_weight({ ounces: 0, pounds: 0})`
+Here is an example of creating keys and certs using **OpenSSL**
+```bash
+openssl req -newkey rsa:2048 -nodes -keyout key.pem -x509 -days 365 -out certificate.pem
+```
 
-now to serve up that value:
+### Testing the Scale Server
+We should now be ready to test that the scale server is working correctly
 
-- run a cgi-enabled web server (i chose [mongoose](https://code.google.com/p/mongoose/))
-- browse or make an ajax call to readscale.cgi; see _example.html_
+Now to serve up that value:
 
-## Notes
+- Start the server
+```bash
+python scaleServer.py -k <keyfile> -c <certfile>
+```
+- Open a browser and go to _https://localhost:8000/_
+- Validate the the scale values will live update in the form 
+provided!  Clicking `record` will lock in the values and close the websocket
 
-- in my example (and probably most real world instances) jsonp is used to circumvent same-origin-policy, but if the computer with the scale is also the web server then you shouldn't have to
-- i chose the mongoose web server because i was working with encrypted content and needed ssl, but if you don't you could use the built in python http.server
+### Using the Server in your Application
+
+To use the server in your own web app, just make the appropriate changes to 
+the code found within the `<script>` tags in `templates/index.html`

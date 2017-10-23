@@ -17,10 +17,7 @@ from readscale import set_scale
 
 clients = 0
 
-try:
-    scale = set_scale()
-except ValueError:
-    scale = None
+scale = None
 
 
 class WeightApp(WebSocketApplication):
@@ -124,11 +121,13 @@ if __name__ == '__main__':
     args = parse_args()
     server_args = []
     server_kwargs = dict()
+    try:
+        scale = set_scale()
+    except ValueError:
+        scale = None
     if args.cert and args.key:
         server_kwargs.update({'keyfile': args.key,
                               'certfile': args.cert})
-    else:
-        server_kwargs.update({'ssl_context': create_context()})
     server_args.append(('localhost', 8000))
     server_args.append(
         Resource([
