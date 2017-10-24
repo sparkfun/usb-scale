@@ -19,6 +19,16 @@ to know them for the install procedure below.
 On the computer that needs to read from the scale:
 
 - Install [python 2.7](http://www.python.org/getit/)
+- Update your path information so that you can use `pip` and `python` in the shell
+  - Right Click on the Start icon
+  - Select `System`
+  - Select `Advanced system settings`
+  - Click on `Environment Vriables...`
+  - Select `Path` from the `System variables` list
+  - Click `Edit...`
+  - Verify or add entries for `C:\Python27\` and `C:\Python27\scripts\`
+  - Click `OK` to exit from the menus 
+  
 - Install gevent and gevent-websocket ```pip install gevent gevent-websocket```
 
 For Windows installations:
