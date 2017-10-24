@@ -18,7 +18,7 @@ to know them for the install procedure below.
 ### Installation
 On the computer that needs to read from the scale:
 
-- Install [python](http://www.python.org/getit/)
+- Install [python 2.7](http://www.python.org/getit/)
 - Install gevent and gevent-websocket ```pip install gevent gevent-websocket```
 
 For Windows installations:
