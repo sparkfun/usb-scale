@@ -1,36 +1,81 @@
-#reading a usb hid scale with your browser
+# Reading a Usb HID Scale with your Browser
 
-these instructions are for the **dymo m25 postal scale** on **windows 7** but with a little hacking other scales and operating systems should be usable.
+These instructions are for the **Dymo M25 postal scale** on **Windows 8**, 
+**Windows 10**, or **Mac OS X** but with a little hacking other scales and 
+operating systems should be usable.
 
-readscale.cgi is a modified version of the code found here (used with permission): http://steventsnyder.com/reading-a-dymo-usb-scale-using-python/
+readscale.cgi is a modified version of the code found here (used with 
+permission): http://steventsnyder.com/reading-a-dymo-usb-scale-using-python/
 
-##how to
+The newest version serves the scale values via Websockets
 
-vendor and products ids for the m25 should be 0922 and 8004 respectively. if your scale is different, update readscale.cgi with its values. you'll also need to know them for the install procedure below.
+## How To
 
-on the computer that needs to read from the scale:
+Vendor and products ids for the m25 should be 0922 and 8004 respectively. If 
+your scale is different, update readscale.py with its values. you'll also need 
+to know them for the install procedure below.
 
-- install [python](http://www.python.org/getit/)
-- install [pyusb](https://github.com/walac/pyusb) (python.exe setup.py install)
-- install [libusb-win32](http://sourceforge.net/apps/trac/libusb-win32/wiki)
+### Installation
+On the computer that needs to read from the scale:
 
-now we roll up a driver that python can read:
+- Install [python 2.7](http://www.python.org/getit/)
+- Update your path information so that you can use `pip` and `python` in the shell
+  - Right Click on the Start icon
+  - Select `System`
+  - Select `Advanced system settings`
+  - Click on `Environment Vriables...`
+  - Select `Path` from the `System variables` list
+  - Click `Edit...`
+  - Verify or add entries for `C:\Python27\` and `C:\Python27\scripts\`
+  - Click `OK` to exit from the menus 
+  - If you are still having issues running `pip` you can also replace the `pip` commands below with 
+  ```bash
+  python -m pip install ...
+  ```
+  
+- Install gevent and gevent-websocket ```pip install gevent gevent-websocket```
 
-- plug the scale in and turn it on
-- run LIBUSBDIR/bin/ARCH/install-filter-win.exe (choose your scale device)
-- run LIBUSBDIR/bin/inf-wizard.exe (choose your scale device and "install now" at the end)
-- restart the scale
+For Windows installations:
+- Install pyusb ```pip install pyusb```
+- Install the proper driver so that Python can talk to the scale on 
+Windows.  There are many ways to do this, but the recommeded method is with 
+[**Zadig**](http://zadig.akeo.ie/)
+  - Plug in the scale and turn it on
+  - Open **Zadig**
+  - Click ```Options > List All Devices```
+  - Select ```M25 25 lb Digital Postal Scale```
+  - We've had the best luck with the `libusbK` driver, but you may have to play around a little
+  - Click ```Install Driver```
+  - You should disconnect and reconnect the scale at this point
 
-run `python.exe readscale.cgi`
+For Mac OSX installations:
+- Install hidapi ```pip install hidapi```
 
-you should see something like `here_is_the_weight({ ounces: 0, pounds: 0})`
+### Creating Certificates and Keys
+If you need to serve the scale values over **HTTPS** (which you probably 
+should).  You will need a certificate and private key. 
 
-now to serve up that value:
+Here is an example of creating keys and certs using **OpenSSL**
+```bash
+openssl req -newkey rsa:2048 -nodes -keyout key.pem -x509 -days 365 -out certificate.pem
+```
 
-- run a cgi-enabled web server (i chose [mongoose](https://code.google.com/p/mongoose/))
-- browse or make an ajax call to readscale.cgi; see _example.html_
+### Testing the Scale Server
+We should now be ready to test that the scale server is working correctly
 
-##notes
+Now to serve up that value:
 
-- in my example (and probably most real world instances) jsonp is used to circumvent same-origin-policy, but if the computer with the scale is also the web server then you shouldn't have to
-- i chose the mongoose web server because i was working with encrypted content and needed ssl, but if you don't you could use the built in python http.server
+- Start the server
+```bash
+python scaleServer.py -k <keyfile> -c <certfile>
+```
+- Open a browser and go to _https://localhost:8000/_
+- Validate the the scale values will live update in the form 
+provided!  Clicking `record` will lock in the values and close the websocket
+
+### Using the Server in your Application
+
+To use the server in your own web app, just make the appropriate changes to 
+the code found within the `<script>` tags in `templates/index.html`
+
+If you'd like to run the server in the background, you might consider using `pythonw`
