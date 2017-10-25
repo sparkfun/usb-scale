@@ -73,6 +73,9 @@ class USBScaleWin(USBScaleBase):
         self.device = usb.core.find(idVendor=self.VENDOR_ID,
                                     idProduct=self.PRODUCT_ID)
 
+        # if the device isn't found, bail
+        if not self.device:
+            raise ValueError('Cannot find device')
         # use the first/default configuration
         self.device.set_configuration()
         # first endpoint

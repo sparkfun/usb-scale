@@ -95,17 +95,6 @@ def static_wsgi_app(environ, start_response):
     return retval
 
 
-def create_context(servername='localhost'):
-    """
-    Create SSL context
-    :return: SSL context
-    """
-    context = ssl.create_default_context(purpose=ssl.Purpose.CLIENT_AUTH)
-    context.load_default_certs()
-    context.check_hostname = False
-    return context
-
-
 def parse_args():
     """
     Parse cmd line arguments
@@ -124,6 +113,7 @@ if __name__ == '__main__':
     try:
         scale = set_scale()
     except ValueError:
+        print "ERROR: Unable to connect to the scale!!"
         scale = None
     if args.cert and args.key:
         server_kwargs.update({'keyfile': args.key,
