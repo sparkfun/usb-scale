@@ -4,7 +4,7 @@
 
 import argparse
 import json
-import sys
+import os
 import threading
 import time
 import sys
@@ -106,6 +106,12 @@ def parse_args():
     return parser.parse_args()
 
 
+def validate_file(_file):
+    if not os.path.isfile(_file):
+        raise RuntimeError("The file provided does not exist! {}".format(_file))
+    return True
+
+
 if __name__ == '__main__':
     args = parse_args()
     server_args = []
@@ -115,7 +121,7 @@ if __name__ == '__main__':
     except ValueError:
         print "ERROR: Unable to connect to the scale!!"
         scale = None
-    if args.cert and args.key:
+    if validate_file(args.cert) and validate_file(args.key):
         server_kwargs.update({'keyfile': args.key,
                               'certfile': args.cert})
     server_args.append(('localhost', 8000))
