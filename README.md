@@ -28,6 +28,10 @@ On the computer that needs to read from the scale:
   - Click `Edit...`
   - Verify or add entries for `C:\Python27\` and `C:\Python27\scripts\`
   - Click `OK` to exit from the menus 
+  - If you are still having issues running `pip` you can also replace the `pip` commands below with 
+  ```bash
+  python -m pip install ...
+  ```
   
 - Install gevent and gevent-websocket ```pip install gevent gevent-websocket```
 
@@ -40,7 +44,9 @@ Windows.  There are many ways to do this, but the recommeded method is with
   - Open **Zadig**
   - Click ```Options > List All Devices```
   - Select ```M25 25 lb Digital Postal Scale```
+  - We've had the best luck with the `libusbK` driver, but you may have to play around a little
   - Click ```Install Driver```
+  - You should disconnect and reconnect the scale at this point
 
 For Mac OSX installations:
 - Install hidapi ```pip install hidapi```
