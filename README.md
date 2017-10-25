@@ -77,3 +77,5 @@ provided!  Clicking `record` will lock in the values and close the websocket
 
 To use the server in your own web app, just make the appropriate changes to 
 the code found within the `<script>` tags in `templates/index.html`
+
+If you'd like to run the server in the background, you might consider using `pythonw`
