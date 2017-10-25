@@ -107,6 +107,11 @@ def parse_args():
 
 
 def validate_file(_file):
+    """
+    Check to see if a file exists
+    :param _file: path to file
+    :return: True for file exists, Raises RuntimeError if doesn't exist
+    """
     if not os.path.isfile(_file):
         raise RuntimeError("The file provided does not exist! {}".format(_file))
     return True
@@ -121,7 +126,9 @@ if __name__ == '__main__':
     except ValueError:
         print "ERROR: Unable to connect to the scale!!"
         scale = None
-    if validate_file(args.cert) and validate_file(args.key):
+    if not args.cert and not args.key:
+        pass
+    elif validate_file(args.cert) and validate_file(args.key):
         server_kwargs.update({'keyfile': args.key,
                               'certfile': args.cert})
     server_args.append(('localhost', 8000))
